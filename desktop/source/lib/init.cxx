@@ -2729,6 +2729,7 @@ static void doc_paintTile(LibreOfficeKitDocument* pThis,
     // everything is painted bigger or smaller. This is different to what Calc's internal scaling
     // would do - because that one is trying to fit the lines between cells to integer multiples of
     // pixels.
+#if 0
     comphelper::ScopeGuard dpiScaleGuard([]() { comphelper::LibreOfficeKit::setDPIScale(1.0); });
     double fDPIScaleX = 1.0;
     if (doc_getDocumentType(pThis) == LOK_DOCTYPE_SPREADSHEET)
@@ -2737,6 +2738,7 @@ static void doc_paintTile(LibreOfficeKitDocument* pThis,
         assert(fabs(fDPIScaleX - ((nCanvasHeight * 3840.0) / (256.0 * nTileHeight))) < 0.0001);
         comphelper::LibreOfficeKit::setDPIScale(fDPIScaleX);
     }
+#endif
 
 #if defined(IOS)
     paintTileIOS(pThis, pBuffer, nCanvasWidth, nCanvasHeight, fDPIScaleX, nTilePosX, nTilePosY, nTileWidth, nTileHeight);
