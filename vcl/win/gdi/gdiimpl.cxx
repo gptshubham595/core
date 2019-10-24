@@ -2584,7 +2584,7 @@ bool WinSalGraphicsImpl::supportsOperation(OutDevSupportType eType) const
     switch (eType)
     {
         case OutDevSupportType::TransparentRect:
-            bRet = mbVirDev || mbWindow;
+            bRet = mrParent.mbVirDev || mrParent.mbWindow;
             break;
         case OutDevSupportType::B2DDraw:
             bRet = bAllowForTest;
