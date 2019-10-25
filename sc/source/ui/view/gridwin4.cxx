@@ -1141,18 +1141,30 @@ void ScGridWindow::PaintTile( VirtualDevice& rDevice,
 
     // page break zoom, and aLogicMode in ScViewData - hardcode that to what
     // we mean as 100% (256px tiles meaning 3840 twips)
-    Fraction aFracX(long(256 * TWIPS_PER_PIXEL), 3840);
-    Fraction aFracY(long(256 * TWIPS_PER_PIXEL), 3840);
+#if 1
+    Fraction aFracX(long(nOutputWidth * TWIPS_PER_PIXEL), nTileWidth);
+    Fraction aFracY(long(nOutputHeight * TWIPS_PER_PIXEL), nTileHeight);
+#else // cairo zoom
+    Fraction aFracX(long(nOutputWidth * TWIPS_PER_PIXEL), 3840);
+    Fraction aFracY(long(nOutputHeight * TWIPS_PER_PIXEL), 3840);
+#endif
     pViewData->SetZoom(aFracX, aFracY, true);
 
+#if 1
     // Cairo or CoreGraphics scales for us, we have to compensate for that,
     // otherwise we are painting too far away
     const double fDPIScale = comphelper::LibreOfficeKit::getDPIScale();
 
+    const double fTilePosXPixel = static_cast<double>(nTilePosX) * nOutputWidth / nTileWidth;
+    const double fTilePosYPixel = static_cast<double>(nTilePosY) * nOutputHeight / nTileHeight;
+    const double fTileBottomPixel = static_cast<double>(nTilePosY + nTileHeight) * nOutputHeight / nTileHeight;
+    const double fTileRightPixel = static_cast<double>(nTilePosX + nTileWidth) * nOutputWidth / nTileWidth;
+#else // cairo zoom
     const double fTilePosXPixel = static_cast<double>(nTilePosX) * nOutputWidth / (nTileWidth * fDPIScale);
     const double fTilePosYPixel = static_cast<double>(nTilePosY) * nOutputHeight / (nTileHeight * fDPIScale);
     const double fTileBottomPixel = static_cast<double>(nTilePosY + nTileHeight) * nOutputHeight / (nTileHeight * fDPIScale);
     const double fTileRightPixel = static_cast<double>(nTilePosX + nTileWidth) * nOutputWidth / (nTileWidth * fDPIScale);
+#endif
 
     SCTAB nTab = pViewData->GetTabNo();
     ScDocument* pDoc = pViewData->GetDocument();
