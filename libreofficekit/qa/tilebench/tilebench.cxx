@@ -339,8 +339,9 @@ static bool testJoinsAt( Document *pDocument, long nX, long nY,
                                       vDiff );
         if ( nDifferences > 0 )
         {
-            fprintf( stderr, "  %d differences in sub-tile pixel mismatch at %ld, %ld at offset %ld, %ld (twips)\n",
-                     nDifferences, rPos.X, rPos.Y, initPosX, initPosY );
+            fprintf( stderr, "  %d differences in sub-tile pixel mismatch at %ld, %ld at offset %ld, %ld (twips) size %ld\n",
+                     nDifferences, rPos.X, rPos.Y, initPosX, initPosY,
+                     nTileTwipWidth);
             dumpTile("_base", nTilePixelWidth * 2, nTilePixelHeight * 2,
                      mode, vBase.data());
 /*            dumpTile("_sub", nTilePixelWidth, nTilePixelHeight,
@@ -368,21 +369,37 @@ static int testJoin( Document *pDocument)
     // Use realistic dimensions, similar to the Online client.
     long const nTilePixelSize = 256;
     long const nTileTwipSize = 1852;
+    double fZooms[] = {
+        0.5, 0.6, 0.7, 0.85,
+        1.0,
+        1.2, 1.5, 1.75,
+        2.0
+    };
     long nFails = 0;
+    std::stringstream results;
 
-    for( long y = 0; y < 5; ++y )
+    for( auto z : fZooms )
     {
-        for( long x = 0; x < 5; ++x )
+        long nBad = 0;
+        for( long y = 0; y < 5; ++y )
         {
-            if ( !testJoinsAt( pDocument, x, y, nTilePixelSize, nTileTwipSize ) )
-                nFails++;
+            for( long x = 0; x < 5; ++x )
+            {
+                if ( !testJoinsAt( pDocument, x, y, nTilePixelSize, nTileTwipSize * z ) )
+                    nBad++;
+            }
         }
+        if (nBad > 0)
+            results << "\tZoom " << z << " bad tiles: " << nBad << "\n";
+        nFails += nBad;
     }
 
     if (nFails > 0)
         fprintf( stderr, "Failed %ld joins\n", nFails );
     else
         fprintf( stderr, "All joins compared correctly\n" );
+
+    fprintf(stderr, "%s\n", results.str().c_str());
 
     return nFails;
 }
